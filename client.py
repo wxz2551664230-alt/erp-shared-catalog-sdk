@@ -1,14 +1,15 @@
-"""Reusable ERP product exchange client. Credentials live only in memory."""
+"""Reusable ERP product exchange client. Public read/create API; no account, password or API key required."""
 from __future__ import annotations
 
 import argparse
-import getpass
 import hashlib
 import json
 from pathlib import Path
 from urllib.parse import urlsplit
 
 import requests
+
+__version__ = "1.1.0"
 
 
 class CatalogClient:
@@ -28,15 +29,18 @@ class CatalogClient:
             raise RuntimeError("连接失败或结果未知；请保留来源编号和原始上传文件，重试时不要修改") from None
         if response.status_code != 200:
             # Do not echo response bodies, URLs or headers that may contain secrets.
-            raise RuntimeError(f"产品库请求失败 HTTP {response.status_code}；401 请重新登录，403 检查权限，409 核对资料差异，422 检查字段")
+            raise RuntimeError(f"产品库请求失败 HTTP {response.status_code}；401/403 请核对服务地址和部署版本，409 核对资料差异，422 检查字段")
         value = response.json()
         if not isinstance(value, dict):
             raise RuntimeError("产品库返回格式错误")
         return value
 
-    def login(self, username, password):
-        self.call("POST", "/api/v1/auth/login", json={"username": username, "password": password})
+    def connect(self):
         return self.call("GET", "/api/v1/shared-catalog/v1/capabilities")
+
+    def login(self, username=None, password=None):
+        """Compatibility alias; supplied credentials are ignored and never sent."""
+        return self.connect()
 
     def search(self, search="", after_id="", limit=50):
         return self.call("GET", "/api/v1/shared-catalog/v1/products", params=dict(search=search, after_id=after_id, limit=limit))
@@ -50,10 +54,7 @@ class CatalogClient:
         return self.call("POST", "/api/v1/shared-catalog/v1/products", json=product)
 
     def close(self):
-        try:
-            self.call("POST", "/api/v1/auth/logout")
-        finally:
-            self.session.close()
+        self.session.close()
 
 
 def from_ozon_submission(document, source_store_id):
@@ -93,7 +94,7 @@ def from_ozon_submission(document, source_store_id):
 def main():
     parser = argparse.ArgumentParser(description="共享产品库：读取 / 写入；不会调用 OZON 或执行上架")
     parser.add_argument("--url", required=True)
-    parser.add_argument("--username", required=True)
+    parser.add_argument("--username", default="", help=argparse.SUPPRESS)  # old CLI compatibility; ignored
     sub = parser.add_subparsers(dest="command", required=True)
     search = sub.add_parser("search")
     search.add_argument("--text", default="")
@@ -115,10 +116,8 @@ def main():
         print("入库文件已生成，请核对后执行 upload；尚未上传。")
         return
     client = CatalogClient(args.url)
-    logged_in = False
     try:
-        client.login(args.username, getpass.getpass("ERP 密码（不保存）："))
-        logged_in = True
+        client.connect()
         if args.command == "search":
             value = client.search(args.text, args.after_id)
         elif args.command == "read":
@@ -131,13 +130,7 @@ def main():
             value = client.add(json.loads(Path(args.file).read_text(encoding="utf-8-sig")))
         print(json.dumps(value, ensure_ascii=False, indent=2))
     finally:
-        if logged_in:
-            try:
-                client.close()
-            except RuntimeError:
-                print("本次连接已关闭；服务端会话将按有效期失效。")
-        else:
-            client.session.close()
+        client.close()
 
 
 if __name__ == "__main__":

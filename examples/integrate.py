@@ -1,5 +1,4 @@
-"""Read-only example. Set ERP_BASE_URL and ERP_USERNAME locally; password is prompted."""
-import getpass
+"""Read-only example. Set ERP_BASE_URL locally. Public API requires no credentials."""
 import os
 from pathlib import Path
 import sys
@@ -11,7 +10,7 @@ from client import CatalogClient
 def main():
     client = CatalogClient(os.environ["ERP_BASE_URL"])
     try:
-        client.login(os.environ["ERP_USERNAME"], getpass.getpass("ERP password: "))
+        client.connect()
         page = client.search(search="", limit=10)
         for summary in page["items"]:
             print(summary["id"], summary["sku"], summary["name"])

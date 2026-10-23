@@ -2,17 +2,15 @@
 
 所有路径相对于管理员提供的 HTTPS 根地址。SDK 仅允许远程 HTTPS；本机开发允许 HTTP localhost。请求 JSON，响应 JSON，不跟随重定向。
 
-## 登录和权限
+## 免登录访问
 
-`POST /api/v1/auth/login`
+专用接口公开查询、读取和新增，不需要账号、密码、API Key 或 Cookie。调用 `GET /api/v1/shared-catalog/v1/capabilities` 应返回 `authentication: "none"`。无需调用 `/auth/login` 或 `/auth/logout`；这些仍是 ERP 内部账号接口，不属于本接入包。
 
-```json
-{"username":"YOUR_ACCOUNT","password":"ENTER_PRIVATELY","remember":false}
-```
+公开范围仅限下表列出的请求方法和路径。产品修改、删除、订单、店铺、连接及账号管理没有开放。成本等文档列明的产品字段可被任何访问者读取。当前适配面向桌面/服务器程序，不提供跨站浏览器 CORS；来自其他站点的浏览器写请求仍受来源检查。
 
-成功返回 HTTP 200 并设置 `erp_session` Cookie。后续请求带同一个 Cookie。使用个人产品库协作者账号，不分享管理员账号；不使用 Ozon API Key、店铺 Client ID 或数据库密码登录。SDK 用 `requests.Session` 保持会话；密码和 Cookie 不得进入日志、Git、提交备份或图片下载请求。
+来源去重身份是全局 `source + external_id`，与 Cookie 或登录账号无关。建议 external_id 包含固定安装实例或业务系统命名空间，防止不同使用者恰好产生相同编号；同一商品重试必须保持原身份。来源身份不是认证信息，不能授予修改权限。
 
-`POST /api/v1/auth/logout` 注销当前会话。401 表示需要重新登录；账号停用后不可继续使用。当前不提供独立长期 API Key。
+历史账号模式已导入的记录保留原身份，不自动变更或合并到新公开身份；已有产品请保留原 product_id，不要直接批量重新导入。
 
 ## 接口
 
@@ -60,7 +58,7 @@
 {"product_id":"0123456789abcdef0123456789abcdef","created":true,"replayed":false}
 ```
 
-产品状态为 `draft`。相同身份与内容重试返回同一个 ID，`created=false,replayed=true`。身份绑定登录账号 + source + external_id，不同账号之间不共用幂等身份。同身份不同内容返回 409；原资料不会被覆盖。
+产品状态为 `draft`。相同身份与内容重试返回同一个 ID，`created=false,replayed=true`。身份绑定全局 source + external_id，登录或切换账号不改变新请求的身份。同身份不同内容返回 409；原资料不会被覆盖。
 
 一个产品及其规格、图片关联在同一事务内保存。网络超时不代表保存失败；原样重试确认，不能更换 external_id。请保持转换算法和原始 JSON 稳定，尤其不得把每次当前时间放入来源 ID。
 
@@ -68,8 +66,8 @@
 
 | HTTP | 处理 |
 | --- | --- |
-| 401 | 重新登录，不重复平台上架 |
-| 403 | 联系管理员检查账号权限 |
+| 401 | 检查服务地址、接口路径和服务端版本；专用接口不要求登录 |
+| 403 | 检查请求方法、浏览器来源或网关限制；不要尝试绕过内部接口权限 |
 | 404 | 产品不存在、已归档，或服务未部署对应接口 |
 | 409 | 同一来源内容冲突，核对原产品；不能换 ID 绕过 |
 | 422 | 字段、长度、URL、数值或格式错误 |

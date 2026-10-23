@@ -1,89 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Shared Catalog Developer API",
-    "version": "1.0.0",
-    "description": "Dedicated product exchange only. Obtain an HTTPS service address and collaborator account privately from the administrator."
+    "title": "Public Shared Catalog API",
+    "version": "1.1.0",
+    "description": "Public read and create. No account, password, API key or cookie required. Update/delete and other ERP APIs are not public."
   },
   "servers": [
     {
       "url": "https://erp.example.com",
-      "description": "Placeholder only"
+      "description": "Replace with the service root provided by the administrator"
     }
   ],
+  "security": [],
   "paths": {
-    "/api/v1/auth/login": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "summary": "Login",
-        "operationId": "login_api_v1_auth_login_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Login"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Login Api V1 Auth Login Post"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        },
-        "security": []
-      }
-    },
-    "/api/v1/auth/logout": {
-      "post": {
-        "tags": [
-          "auth"
-        ],
-        "summary": "Logout",
-        "operationId": "logout_api_v1_auth_logout_post",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Logout Api V1 Auth Logout Post"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "erpSession": []
-          }
-        ]
-      }
-    },
     "/api/v1/shared-catalog/v1/capabilities": {
       "get": {
         "tags": [
@@ -101,11 +30,7 @@
             }
           }
         },
-        "security": [
-          {
-            "erpSession": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/v1/shared-catalog/v1/products": {
@@ -171,11 +96,7 @@
             }
           }
         },
-        "security": [
-          {
-            "erpSession": []
-          }
-        ]
+        "security": []
       },
       "post": {
         "tags": [
@@ -213,11 +134,7 @@
             }
           }
         },
-        "security": [
-          {
-            "erpSession": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/v1/shared-catalog/v1/products/{product_id}": {
@@ -258,45 +175,24 @@
             }
           }
         },
-        "security": [
-          {
-            "erpSession": []
-          }
-        ]
+        "security": []
       }
     }
   },
   "components": {
     "schemas": {
-      "Login": {
+      "HTTPValidationError": {
         "properties": {
-          "token": {
-            "type": "string",
-            "maxLength": 500,
-            "title": "Token",
-            "default": ""
-          },
-          "username": {
-            "type": "string",
-            "maxLength": 64,
-            "title": "Username",
-            "default": ""
-          },
-          "password": {
-            "type": "string",
-            "maxLength": 128,
-            "title": "Password",
-            "default": ""
-          },
-          "remember": {
-            "type": "boolean",
-            "title": "Remember",
-            "default": false
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
           }
         },
-        "additionalProperties": false,
         "type": "object",
-        "title": "Login"
+        "title": "HTTPValidationError"
       },
       "SharedImport": {
         "properties": {
@@ -379,19 +275,6 @@
           "variants"
         ],
         "title": "SharedImport"
-      },
-      "HTTPValidationError": {
-        "properties": {
-          "detail": {
-            "items": {
-              "$ref": "#/components/schemas/ValidationError"
-            },
-            "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
       },
       "ValidationError": {
         "properties": {
@@ -534,13 +417,6 @@
           "sku"
         ],
         "title": "SharedVariant"
-      }
-    },
-    "securitySchemes": {
-      "erpSession": {
-        "type": "apiKey",
-        "in": "cookie",
-        "name": "erp_session"
       }
     }
   }

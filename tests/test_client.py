@@ -20,10 +20,10 @@ class Session:
 
 
 class ClientTests(unittest.TestCase):
-    def test_login_read_add_and_close_use_same_session(self):
+    def test_public_read_add_and_close_never_login(self):
         session = Session()
         client = CatalogClient("https://erp.example.com", session)
-        self.assertEqual(client.login("example", "test-only-password"), {"version": 1})
+        self.assertEqual(client.connect(), {"version": 1})
         client.search("test", limit=10)
         client.read("a" * 32)
         client.add({"source": "example"})
@@ -31,7 +31,15 @@ class ClientTests(unittest.TestCase):
         self.assertTrue(session.closed)
         self.assertTrue(all(call[2]["allow_redirects"] is False for call in session.calls))
         self.assertFalse(hasattr(client, "password"))
-        self.assertEqual(session.calls[2][2]["params"]["limit"], 10)
+        self.assertFalse(any("/auth/" in call[1] for call in session.calls))
+        self.assertEqual(session.calls[1][2]["params"]["limit"], 10)
+
+    def test_legacy_login_alias_never_sends_credentials(self):
+        session = Session()
+        CatalogClient("https://erp.example.com", session).login("ignored", "not-sent")
+        self.assertEqual(len(session.calls), 1)
+        self.assertTrue(session.calls[0][1].endswith("/capabilities"))
+        self.assertNotIn("json", session.calls[0][2])
 
     def test_rejects_credential_urls_and_remote_plaintext(self):
         for url in ["http://example.com", "https://user:password@example.com", "https://example.com/?token=x"]:
@@ -62,9 +70,9 @@ class ClientTests(unittest.TestCase):
 
     def test_schema_only_contains_exchange_and_auth_endpoints(self):
         document = json.loads((Path(__file__).resolve().parents[1] / "openapi.json").read_text(encoding="utf-8"))
-        self.assertEqual(len(document["paths"]), 5)
+        self.assertEqual(len(document["paths"]), 3)
         for path in document["paths"]:
-            self.assertTrue("/shared-catalog/v1/" in path or path in {"/api/v1/auth/login", "/api/v1/auth/logout"})
+            self.assertTrue("/shared-catalog/v1/" in path)
 
 
 if __name__ == "__main__":
