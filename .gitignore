@@ -1,0 +1,10 @@
+__pycache__/
+.venv/
+.env
+.env.*
+*.log
+*.cookie
+*.key
+upload.json
+product.json
+!examples/product.json

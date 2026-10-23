@@ -1,0 +1,20 @@
+{
+  "source": "example-listing-app",
+  "external_id": "demo-product-001",
+  "sku": "DEMO-001",
+  "name": "示例产品（虚构资料）",
+  "supplier": "示例供应商",
+  "variants": [
+    {
+      "sku": "DEMO-001-RED",
+      "specification": "红色",
+      "color": "红色",
+      "purchase_price_cny": 12.5,
+      "package_length_mm": 200,
+      "package_width_mm": 150,
+      "package_height_mm": 20,
+      "weight_grams": 180,
+      "images": ["https://images.example.com/demo-red.jpg"]
+    }
+  ]
+}
