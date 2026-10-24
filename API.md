@@ -1,5 +1,7 @@
 # API v1
 
+**1.3.0 产品资料扩展：**描述、标签、独立采购/参考链接、平台属性和净重见 [PRODUCT_FIELDS.md](PRODUCT_FIELDS.md)。不接收上架信息快照；旧请求保持兼容。
+
 所有路径相对于管理员提供的 HTTPS 根地址。SDK 仅允许远程 HTTPS；本机开发允许 HTTP localhost。请求 JSON，响应 JSON，不跟随重定向。
 
 ## 免登录访问

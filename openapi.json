@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Public Shared Catalog API",
-    "version": "1.2.0",
-    "description": "Public read/create; new products enter wff library with ready status."
+    "version": "1.3.0",
+    "description": "Public reusable product facts; no store or publication snapshots."
   },
   "servers": [
     {
@@ -186,8 +186,87 @@
   },
   "components": {
     "schemas": {
+      "SharedImportResult": {
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "title": "Product Id"
+          },
+          "created": {
+            "type": "boolean",
+            "title": "Created"
+          },
+          "replayed": {
+            "type": "boolean",
+            "title": "Replayed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "product_id",
+          "created",
+          "replayed"
+        ],
+        "title": "SharedImportResult"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
       "SharedImport": {
         "properties": {
+          "product_info": {
+            "$ref": "#/components/schemas/ProductInfo"
+          },
           "source": {
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9._-]{0,59}$",
@@ -354,6 +433,18 @@
             ],
             "title": "Weight Grams"
           },
+          "net_weight_grams": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Weight Grams"
+          },
           "images": {
             "items": {
               "type": "string"
@@ -370,186 +461,159 @@
         ],
         "title": "SharedVariant"
       },
-      "SharedProductDetail": {
+      "ProductInfo": {
         "properties": {
-          "id": {
+          "description": {
             "type": "string",
-            "title": "Id"
+            "maxLength": 20000,
+            "title": "Description",
+            "default": ""
           },
-          "sku": {
-            "type": "string",
-            "title": "Sku"
-          },
-          "name": {
-            "type": "string",
-            "title": "Name"
-          },
-          "supplier": {
-            "type": "string",
-            "title": "Supplier"
-          },
-          "source_url": {
-            "type": "string",
-            "title": "Source Url"
-          },
-          "description_category_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description Category Id"
-          },
-          "type_id": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Type Id"
-          },
-          "status": {
-            "type": "string",
-            "title": "Status"
-          },
-          "source_type": {
-            "type": "string",
-            "title": "Source Type"
-          },
-          "updated_at": {
-            "type": "string",
-            "title": "Updated At"
-          },
-          "variants": {
-            "items": {
-              "$ref": "#/components/schemas/SharedVariantResult"
-            },
-            "type": "array",
-            "title": "Variants"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "sku",
-          "name",
-          "supplier",
-          "source_url",
-          "description_category_id",
-          "type_id",
-          "status",
-          "source_type",
-          "updated_at",
-          "variants"
-        ],
-        "title": "SharedProductDetail"
-      },
-      "SharedVariantResult": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id"
-          },
-          "sku": {
-            "type": "string",
-            "title": "Sku"
-          },
-          "specification": {
-            "type": "string",
-            "title": "Specification"
-          },
-          "color": {
-            "type": "string",
-            "title": "Color"
-          },
-          "size": {
-            "type": "string",
-            "title": "Size"
-          },
-          "purchase_price_cny": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Purchase Price Cny"
-          },
-          "package_length_mm": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Package Length Mm"
-          },
-          "package_width_mm": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Package Width Mm"
-          },
-          "package_height_mm": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Package Height Mm"
-          },
-          "weight_grams": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Weight Grams"
-          },
-          "images": {
+          "search_tags": {
             "items": {
               "type": "string"
             },
             "type": "array",
-            "title": "Images"
+            "maxItems": 100,
+            "title": "Search Tags"
+          },
+          "purchase_url": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Purchase Url",
+            "default": ""
+          },
+          "ozon_source_url": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Ozon Source Url",
+            "default": ""
+          },
+          "wb_source_url": {
+            "type": "string",
+            "maxLength": 4000,
+            "title": "Wb Source Url",
+            "default": ""
+          },
+          "category_name": {
+            "type": "string",
+            "maxLength": 800,
+            "title": "Category Name",
+            "default": ""
+          },
+          "attributes_platform": {
+            "type": "string",
+            "pattern": "^(|ozon|wildberries)$",
+            "title": "Attributes Platform",
+            "default": ""
+          },
+          "wb_subject_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wb Subject Id"
+          },
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/ProductAttribute"
+            },
+            "type": "array",
+            "maxItems": 200,
+            "title": "Attributes"
+          },
+          "complex_attributes": {
+            "items": {
+              "$ref": "#/components/schemas/ComplexAttribute"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Complex Attributes"
           }
         },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ProductInfo"
+      },
+      "ComplexAttribute": {
+        "properties": {
+          "attributes": {
+            "items": {
+              "$ref": "#/components/schemas/ProductAttribute"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Attributes"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "ComplexAttribute"
+      },
+      "ProductAttribute": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0.0,
+            "title": "Id"
+          },
+          "complex_id": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Complex Id",
+            "default": 0
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 300,
+            "title": "Name",
+            "default": ""
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/AttributeValue"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Values"
+          }
+        },
+        "additionalProperties": false,
         "type": "object",
         "required": [
-          "id",
-          "sku",
-          "specification",
-          "color",
-          "size",
-          "purchase_price_cny",
-          "package_length_mm",
-          "package_width_mm",
-          "package_height_mm",
-          "weight_grams",
-          "images"
+          "id"
         ],
-        "title": "SharedVariantResult"
+        "title": "ProductAttribute"
+      },
+      "AttributeValue": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "maxLength": 6000,
+            "title": "Value",
+            "default": ""
+          },
+          "dictionary_value_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dictionary Value Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "AttributeValue"
       },
       "SharedProductPage": {
         "properties": {
@@ -651,81 +715,202 @@
         ],
         "title": "SharedProductSummary"
       },
-      "HTTPValidationError": {
+      "SharedProductDetail": {
         "properties": {
-          "detail": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "sku": {
+            "type": "string",
+            "title": "Sku"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "supplier": {
+            "type": "string",
+            "title": "Supplier"
+          },
+          "source_url": {
+            "type": "string",
+            "title": "Source Url"
+          },
+          "description_category_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description Category Id"
+          },
+          "type_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Type Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "source_type": {
+            "type": "string",
+            "title": "Source Type"
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At"
+          },
+          "product_info": {
+            "$ref": "#/components/schemas/ProductInfo"
+          },
+          "variants": {
             "items": {
-              "$ref": "#/components/schemas/ValidationError"
+              "$ref": "#/components/schemas/SharedVariantResult"
             },
             "type": "array",
-            "title": "Detail"
-          }
-        },
-        "type": "object",
-        "title": "HTTPValidationError"
-      },
-      "ValidationError": {
-        "properties": {
-          "loc": {
-            "items": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer"
-                }
-              ]
-            },
-            "type": "array",
-            "title": "Location"
-          },
-          "msg": {
-            "type": "string",
-            "title": "Message"
-          },
-          "type": {
-            "type": "string",
-            "title": "Error Type"
-          },
-          "input": {
-            "title": "Input"
-          },
-          "ctx": {
-            "type": "object",
-            "title": "Context"
+            "title": "Variants"
           }
         },
         "type": "object",
         "required": [
-          "loc",
-          "msg",
-          "type"
+          "id",
+          "sku",
+          "name",
+          "supplier",
+          "source_url",
+          "description_category_id",
+          "type_id",
+          "status",
+          "source_type",
+          "updated_at",
+          "product_info",
+          "variants"
         ],
-        "title": "ValidationError"
+        "title": "SharedProductDetail"
       },
-      "SharedImportResult": {
+      "SharedVariantResult": {
         "properties": {
-          "product_id": {
+          "net_weight_grams": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Net Weight Grams"
+          },
+          "id": {
             "type": "string",
-            "title": "Product Id"
+            "title": "Id"
           },
-          "created": {
-            "type": "boolean",
-            "title": "Created"
+          "sku": {
+            "type": "string",
+            "title": "Sku"
           },
-          "replayed": {
-            "type": "boolean",
-            "title": "Replayed"
+          "specification": {
+            "type": "string",
+            "title": "Specification"
+          },
+          "color": {
+            "type": "string",
+            "title": "Color"
+          },
+          "size": {
+            "type": "string",
+            "title": "Size"
+          },
+          "purchase_price_cny": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchase Price Cny"
+          },
+          "package_length_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Package Length Mm"
+          },
+          "package_width_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Package Width Mm"
+          },
+          "package_height_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Package Height Mm"
+          },
+          "weight_grams": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Grams"
+          },
+          "images": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Images"
           }
         },
         "type": "object",
         "required": [
-          "product_id",
-          "created",
-          "replayed"
+          "net_weight_grams",
+          "id",
+          "sku",
+          "specification",
+          "color",
+          "size",
+          "purchase_price_cny",
+          "package_length_mm",
+          "package_width_mm",
+          "package_height_mm",
+          "weight_grams",
+          "images"
         ],
-        "title": "SharedImportResult"
+        "title": "SharedVariantResult"
       }
     }
   }

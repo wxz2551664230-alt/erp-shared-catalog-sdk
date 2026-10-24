@@ -14,7 +14,23 @@
       "package_width_mm": 150,
       "package_height_mm": 20,
       "weight_grams": 180,
-      "images": ["https://images.example.com/demo-red.jpg"]
+      "images": [
+        "https://images.example.com/demo-red.jpg"
+      ],
+      "net_weight_grams": null
     }
-  ]
+  ],
+  "product_info": {
+    "description": "示例产品材质与用途说明",
+    "search_tags": [
+      "示例标签"
+    ],
+    "purchase_url": "https://example.com/products/demo",
+    "ozon_source_url": "",
+    "wb_source_url": "",
+    "category_name": "",
+    "attributes_platform": "ozon",
+    "attributes": [],
+    "complex_attributes": []
+  }
 }
