@@ -27,7 +27,7 @@
 
 返回 `{"items":[...],"next_cursor":null}`。`next_cursor` 为 null 时结束。换关键词时清空游标。按产品 ID 排序，不是按更新时间；查询不是快照或增量同步，遍历过程中新增的产品可能需要下一轮重新搜索。归档产品不返回。
 
-摘要字段：`id, sku, name, supplier, source_url, description_category_id, type_id, status, updated_at`。`source_url` 不保证是采购链接；使用方需辨别来源。
+摘要字段：`id, sku, name, supplier, source_url, description_category_id, type_id, status, source_type, updated_at`。`source_url` 不保证是采购链接；使用方需辨别来源。
 
 ### 详情
 
@@ -58,7 +58,7 @@
 {"product_id":"0123456789abcdef0123456789abcdef","created":true,"replayed":false}
 ```
 
-产品状态为 `draft`。相同身份与内容重试返回同一个 ID，`created=false,replayed=true`。身份绑定全局 source + external_id，登录或切换账号不改变新请求的身份。同身份不同内容返回 409；原资料不会被覆盖。
+产品归属 `source_type=wff`（wff产品库），状态为 `ready`（可发布），不进入草稿，不自动发布。两字段由服务端设置，不接受客户端上传。完整字段表和响应示例见 [DATA_MODEL.md](DATA_MODEL.md)。相同身份与内容重试返回同一个 ID，`created=false,replayed=true`。身份绑定全局 source + external_id，登录或切换账号不改变新请求的身份。同身份不同内容返回 409；原资料不会被覆盖。
 
 一个产品及其规格、图片关联在同一事务内保存。网络超时不代表保存失败；原样重试确认，不能更换 external_id。请保持转换算法和原始 JSON 稳定，尤其不得把每次当前时间放入来源 ID。
 

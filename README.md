@@ -4,8 +4,11 @@
 
 这是独立开发者接入包，不包含服务端、店铺账号、产品数据或服务器凭据。服务地址由产品库管理员提供；无需账号、密码或 API Key；仓库中的 `https://erp.example.com` 仅为占位地址。
 
+新增上传直接进入 ERP **产品库 → wff产品库**，状态为 **可发布（ready）**，不进入草稿；不自动上架。
+
 ## 包内文件
 
+- [DATA_MODEL.md](DATA_MODEL.md)：完整产品/规格字段表、单位、必填项、请求与返回示例。
 - [API.md](API.md)：鉴权、字段、分页、错误处理及兼容边界。
 - [openapi.json](openapi.json)：仅包含接入所需接口，可导入 API 调试工具。
 - [client.py](client.py)：Python SDK、命令行和 OZON 成功提交记录转换器。
